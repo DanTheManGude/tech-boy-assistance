@@ -1,13 +1,22 @@
 import { useData, Message } from "@/context/DataContext";
 
 export default function MessageList() {
-  const { messages } = useData();
+  const { messages, isAdmin } = useData();
 
   const renderMessage = (message: Message) => {
-    const { reason, submittedTime } = message;
+    const { reason, fromName, submittedTime } = message;
     return (
       <div className="w-full my-2 rounded-lg border-4 border-green-400">
         <h1 className="ml-1">{reason}</h1>
+        {isAdmin && (
+          <>
+            <p>By {fromName}</p>
+            <p>
+              At {new Date(submittedTime).toDateString()}&nbsp;
+              {new Date(submittedTime).toLocaleTimeString()}
+            </p>
+          </>
+        )}
       </div>
     );
   };
