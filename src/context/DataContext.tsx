@@ -36,10 +36,14 @@ export const DataContextProvider = ({
     get(child(ref(getDatabase()), "admin"))
       .then((snapshot) => {
         if (snapshot.exists()) {
-          setIsAdmin(Boolean(snapshot.val()));
+          setIsAdmin(true);
+        } else {
+          setIsAdmin(false);
         }
       })
-      .catch(() => {});
+      .catch(() => {
+        setIsAdmin(false);
+      });
   }, [user]);
 
   useEffect(() => {
