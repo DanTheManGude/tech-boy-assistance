@@ -38,6 +38,7 @@ export const DataContextProvider = ({
   useEffect(() => {
     if (!user) {
       setIsAdmin(false);
+      setIsAdminLoading(false);
       return;
     }
     setIsAdminLoading(true);
