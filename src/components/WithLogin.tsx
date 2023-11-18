@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 
 export default function WithLogin({ children }: { children: React.ReactNode }) {
-  const { user, logOut = () => {}, logIn = () => {} } = useAuth();
+  const { user, logOut = async () => {}, logIn = async () => {} } = useAuth();
 
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
@@ -25,7 +25,7 @@ export default function WithLogin({ children }: { children: React.ReactNode }) {
 
   return (
     <>
-      <div className="flex items-center justify-center">
+      <div className="flex items-center justify-center mx-3">
         <div className="w-full max-w-sm rounded-lg border border-gray-200 bg-white shadow-md dark:border-gray-700 dark:bg-gray-800">
           <button
             onClick={handleClick}

@@ -4,11 +4,10 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 import { child, get, getDatabase, onValue, ref } from "firebase/database";
 import { useAuth } from "@/context/AuthContext";
 
-type Message = {
+export type Message = {
   fromName: string;
-  uid: string;
-  submittedTime: Date;
-  title: string;
+  submittedTime: number;
+  reason: string;
 };
 
 type Data = {
@@ -29,10 +28,18 @@ export const DataContextProvider = ({
   children: React.ReactNode;
 }) => {
   const { user } = useAuth();
+
+  const [isAdminLoading, setIsAdminLoading] = useState<boolean>(true);
   const [isAdmin, setIsAdmin] = useState<Data["isAdmin"]>(false);
   const [messages, setMessages] = useState<Data["messages"]>([]);
 
   useEffect(() => {
+    if (!user) {
+      setIsAdmin(false);
+      return;
+    }
+    setIsAdminLoading(true);
+
     get(child(ref(getDatabase()), "admin"))
       .then((snapshot) => {
         if (snapshot.exists()) {
@@ -43,6 +50,9 @@ export const DataContextProvider = ({
       })
       .catch(() => {
         setIsAdmin(false);
+      })
+      .finally(() => {
+        setIsAdminLoading(false);
       });
   }, [user]);
 
@@ -88,7 +98,7 @@ export const DataContextProvider = ({
 
   return (
     <DataContext.Provider value={{ isAdmin, messages }}>
-      {children}
+      {!isAdminLoading && children}
     </DataContext.Provider>
   );
 };
