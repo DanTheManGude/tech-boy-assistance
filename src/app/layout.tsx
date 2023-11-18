@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { AuthContextProvider } from "@/context/AuthContext";
+import { DataContextProvider } from "@/context/DataContext";
+
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -20,7 +22,9 @@ export default function RootLayout({
             Tech Boy Assistance
           </h1>
         </div>
-        <AuthContextProvider>{children}</AuthContextProvider>
+        <AuthContextProvider>
+          <DataContextProvider>{children}</DataContextProvider>
+        </AuthContextProvider>
       </body>
     </html>
   );
