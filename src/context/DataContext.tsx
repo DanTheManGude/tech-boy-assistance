@@ -4,14 +4,21 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 import { child, get, getDatabase, onValue, ref } from "firebase/database";
 import { useAuth } from "@/context/AuthContext";
 
-type IsAdmin = boolean;
+type Message = {
+  fromName: string;
+  uid: string;
+  submittedTime: Date;
+  title: string;
+};
 
-interface Data {
-  isAdmin: IsAdmin;
-}
+type Data = {
+  isAdmin: boolean;
+  messages: Message[];
+};
 
 const DataContext = createContext<Data>({
   isAdmin: false,
+  messages: [],
 });
 
 export const useData = () => useContext<Data>(DataContext);
@@ -22,7 +29,8 @@ export const DataContextProvider = ({
   children: React.ReactNode;
 }) => {
   const { user } = useAuth();
-  const [isAdmin, setIsAdmin] = useState<IsAdmin>(false);
+  const [isAdmin, setIsAdmin] = useState<Data["isAdmin"]>(false);
+  const [messages, setMessages] = useState<Data["messages"]>([]);
 
   useEffect(() => {
     get(child(ref(getDatabase()), "admin"))
@@ -34,7 +42,27 @@ export const DataContextProvider = ({
       .catch(() => {});
   }, [user]);
 
+  useEffect(() => {
+    if (!user) {
+      setMessages([]);
+      return () => {};
+    }
+
+    const unsubscribe = onValue(
+      ref(getDatabase(), `messages/${user.uid}`),
+      (snapshot) => {
+        if (snapshot.exists()) {
+          setMessages(Object.values(snapshot.val()));
+        }
+      }
+    );
+
+    return () => unsubscribe();
+  }, [isAdmin, user]);
+
   return (
-    <DataContext.Provider value={{ isAdmin }}>{children}</DataContext.Provider>
+    <DataContext.Provider value={{ isAdmin, messages }}>
+      {children}
+    </DataContext.Provider>
   );
 };

@@ -1,15 +1,14 @@
 "use client";
 
-import LoginLogoutButton from "@/components/LoginLogoutButton";
+import WithLogin from "@/components/WithLogin";
 import { useData } from "@/context/DataContext";
 
 export default function Home() {
   const { isAdmin } = useData();
 
   return (
-    <>
-      {isAdmin ? "admin" : "pleb"}
-      <LoginLogoutButton />
-    </>
+    <WithLogin>
+      <>{isAdmin ? "admin" : "pleb"}</>
+    </WithLogin>
   );
 }

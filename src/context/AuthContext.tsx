@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import {
   GoogleAuthProvider,
+  User,
   UserCredential,
   onAuthStateChanged,
   signInWithPopup,
@@ -11,28 +12,14 @@ import {
 
 import { auth } from "../firebase.config";
 
-// User data type interface
-interface UserType {
-  email: string | null;
-  uid: string | null;
-}
-
-interface ProviderValue {
-  user: UserType;
+type ProviderValue = Partial<{
+  user: User;
   logIn: () => Promise<UserCredential>;
   logOut: () => Promise<void>;
-}
+}>;
 
 // Create auth context
-const AuthContext = createContext<ProviderValue>({
-  user: { email: null, uid: null },
-  logIn: function (): Promise<UserCredential> {
-    throw new Error("Function not implemented.");
-  },
-  logOut: function (): Promise<void> {
-    throw new Error("Function not implemented.");
-  },
-});
+const AuthContext = createContext<ProviderValue>({});
 
 // Make auth context available across the app by exporting it
 export const useAuth = () => useContext<ProviderValue>(AuthContext);
@@ -43,21 +30,17 @@ export const AuthContextProvider = ({
 }: {
   children: React.ReactNode;
 }) => {
-  // Define the constants for the user and loading state
-  const [user, setUser] = useState<UserType>({ email: null, uid: null });
-  const [loading, setLoading] = useState<Boolean>(true);
+  const [user, setUser] = useState<User>();
+  const [loading, setLoading] = useState<boolean>(true);
 
   // Update the state depending on auth
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
-        setUser({
-          email: user.email,
-          uid: user.uid,
-        });
+        setUser(user);
         console.log("login", user.uid);
       } else {
-        setUser({ email: null, uid: null });
+        setUser(undefined);
       }
     });
 
@@ -78,7 +61,7 @@ export const AuthContextProvider = ({
 
   // Logout the user
   const logOut = async () => {
-    setUser({ email: null, uid: null });
+    setUser(undefined);
     return await signOut(auth);
   };
 
