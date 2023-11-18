@@ -81,6 +81,8 @@ export const DataContextProvider = ({
           }, []);
 
           setMessages(fullMessages);
+        } else {
+          setMessages([]);
         }
       });
     } else {
