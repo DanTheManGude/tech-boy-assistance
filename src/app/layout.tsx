@@ -15,6 +15,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
+        <div className="flex items-center justify-center">
+          <h1 className="mb-6 mt-2 text-center text-2xl font-medium text-gray-900 dark:text-white sm:text-3xl sm:font-semibold">
+            Tech Boy Assistance
+          </h1>
+        </div>
         <AuthContextProvider>{children}</AuthContextProvider>
       </body>
     </html>
