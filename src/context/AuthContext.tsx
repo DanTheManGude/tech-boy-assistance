@@ -1,3 +1,5 @@
+"use client";
+
 import React, { createContext, useContext, useEffect, useState } from "react";
 import {
   GoogleAuthProvider,
@@ -5,7 +7,6 @@ import {
   signInWithPopup,
   signOut,
 } from "firebase/auth";
-import { useRouter } from "next/navigation";
 
 import { auth } from "../firebase.config";
 
@@ -30,7 +31,6 @@ export const AuthContextProvider = ({
   // Define the constants for the user and loading state
   const [user, setUser] = useState<UserType>({ email: null, uid: null });
   const [loading, setLoading] = useState<Boolean>(true);
-  const router = useRouter();
 
   // Update the state depending on auth
   useEffect(() => {
@@ -40,6 +40,7 @@ export const AuthContextProvider = ({
           email: user.email,
           uid: user.uid,
         });
+        console.log("login", user.uid);
       } else {
         setUser({ email: null, uid: null });
       }
@@ -49,13 +50,6 @@ export const AuthContextProvider = ({
 
     return () => unsubscribe();
   }, []);
-
-  // Redirect to Dashboard if user exists
-  useEffect(() => {
-    if (user) {
-      router.push("/dashboard");
-    }
-  }, [user, router]);
 
   // Login the user
   const logIn = () => {

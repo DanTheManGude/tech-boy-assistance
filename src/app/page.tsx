@@ -1,14 +1,16 @@
 "use client";
 
-import { AuthContextProvider } from "@/context/AuthContext";
 import LoginButton from "@/components/LoginButton";
+import LogoutButton from "@/components/LogoutButton";
+
+import { useAuth } from "@/context/AuthContext";
 
 export default function Home() {
-  return (
-    <AuthContextProvider>
-      <main className="m-0 bg-gradient-to-br from-primary-color to-blue-400 px-4">
-        <LoginButton />
-      </main>
-    </AuthContextProvider>
-  );
+  const { user } = useAuth();
+
+  if (!user || !user.uid) {
+    return <LoginButton />;
+  }
+
+  return <LogoutButton />;
 }
