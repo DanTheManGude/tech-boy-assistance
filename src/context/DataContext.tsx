@@ -48,14 +48,36 @@ export const DataContextProvider = ({
       return () => {};
     }
 
-    const unsubscribe = onValue(
-      ref(getDatabase(), `messages/${user.uid}`),
-      (snapshot) => {
+    let unsubscribe = () => {};
+
+    if (isAdmin) {
+      unsubscribe = onValue(ref(getDatabase(), `messages`), (snapshot) => {
         if (snapshot.exists()) {
-          setMessages(Object.values(snapshot.val()));
+          const snapshotValue: { [uid: string]: { [key: string]: Message } } =
+            snapshot.val();
+          const fullMessages = Object.values(snapshotValue).reduce(
+            (acc, messagesForOneAccountMap) => {
+              const messagesForOneAccountList = Object.values(
+                messagesForOneAccountMap
+              );
+              return [...acc, ...messagesForOneAccountList];
+            },
+            [] as Message[]
+          );
+
+          setMessages(fullMessages);
         }
-      }
-    );
+      });
+    } else {
+      unsubscribe = onValue(
+        ref(getDatabase(), `messages/${user.uid}`),
+        (snapshot) => {
+          if (snapshot.exists()) {
+            setMessages(Object.values(snapshot.val()));
+          }
+        }
+      );
+    }
 
     return () => unsubscribe();
   }, [isAdmin, user]);
