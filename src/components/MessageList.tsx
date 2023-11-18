@@ -1,21 +1,38 @@
-import { useData, Message } from "@/context/DataContext";
+import { useData, MessageWithKey } from "@/context/DataContext";
+import { getDatabase, ref, update } from "firebase/database";
 
 export default function MessageList() {
   const { messages, isAdmin } = useData();
 
-  const renderMessage = (message: Message) => {
-    const { reason, fromName, submittedTime } = message;
+  const getHandleDelete = (key: string) => () => {
+    update(ref(getDatabase()), { [`messages/${key}`]: null }).catch(
+      console.error
+    );
+  };
+
+  const renderMessage = (message: MessageWithKey) => {
+    const { reason, fromName, submittedTime, key } = message;
+
     return (
-      <div className="w-full my-2 rounded-lg border-4 border-green-400">
-        <h1 className="ml-1">{reason}</h1>
+      <div
+        className="w-full my-2 inline-flex rounded-lg border-4 border-green-400"
+        key={key}
+      >
+        <div className="w-full ml-2">
+          <h1>{reason}</h1>
+          {isAdmin && <p>By {fromName}</p>}
+          <p>
+            At {new Date(submittedTime).toDateString()}&nbsp;
+            {new Date(submittedTime).toLocaleTimeString()}
+          </p>
+        </div>
         {isAdmin && (
-          <>
-            <p>By {fromName}</p>
-            <p>
-              At {new Date(submittedTime).toDateString()}&nbsp;
-              {new Date(submittedTime).toLocaleTimeString()}
-            </p>
-          </>
+          <button
+            className="mr-2 text-orange-600 font-bold"
+            onClick={getHandleDelete(key)}
+          >
+            X
+          </button>
         )}
       </div>
     );

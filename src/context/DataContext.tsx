@@ -10,9 +10,11 @@ export type Message = {
   reason: string;
 };
 
+export type MessageWithKey = Message & { key: string };
+
 type Data = {
   isAdmin: boolean;
-  messages: Message[];
+  messages: MessageWithKey[];
 };
 
 const DataContext = createContext<Data>({
@@ -69,15 +71,14 @@ export const DataContextProvider = ({
         if (snapshot.exists()) {
           const snapshotValue: { [uid: string]: { [key: string]: Message } } =
             snapshot.val();
-          const fullMessages = Object.values(snapshotValue).reduce(
-            (acc, messagesForOneAccountMap) => {
-              const messagesForOneAccountList = Object.values(
-                messagesForOneAccountMap
-              );
-              return [...acc, ...messagesForOneAccountList];
-            },
-            [] as Message[]
-          );
+          const fullMessages = Object.entries(snapshotValue).reduce<
+            MessageWithKey[]
+          >((acc, [uid, messagesForOneAccountMap]) => {
+            const messagesForOneAccountList = Object.entries(
+              messagesForOneAccountMap
+            ).map(([key, message]) => ({ ...message, key: `${uid}/${key}` }));
+            return [...acc, ...messagesForOneAccountList];
+          }, []);
 
           setMessages(fullMessages);
         }
@@ -87,7 +88,14 @@ export const DataContextProvider = ({
         ref(getDatabase(), `messages/${user.uid}`),
         (snapshot) => {
           if (snapshot.exists()) {
-            setMessages(Object.values(snapshot.val()));
+            const snapshotValue: { [key: string]: Message } = snapshot.val();
+            const messagesFromAccount = Object.entries(snapshotValue).map(
+              ([key, message]) => ({
+                ...message,
+                key: `${user.uid}/${key}`,
+              })
+            );
+            setMessages(messagesFromAccount);
           }
         }
       );

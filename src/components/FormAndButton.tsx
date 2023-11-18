@@ -36,7 +36,6 @@ export default function FormAndButton() {
     };
 
     update(ref(getDatabase()), { [`${rootPath}/${key}`]: message })
-      .then(console.log)
       .catch(console.error)
       .finally(() => {
         setReason("");
