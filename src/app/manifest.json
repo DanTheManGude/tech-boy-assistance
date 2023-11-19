@@ -1,0 +1,9 @@
+{
+  "name": "Tech Boy Assistance",
+  "short_name": "Tech Boy Assistance",
+  "description": "Request tech assistance",
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#000000",
+  "background_color": "#000000"
+}
