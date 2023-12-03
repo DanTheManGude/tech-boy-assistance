@@ -1,5 +1,6 @@
-import { getApps, initializeApp } from "firebase/app";
+import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
+import { getMessaging, getToken } from "firebase/messaging";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -10,8 +11,24 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-if (!getApps().length) {
-  initializeApp(firebaseConfig);
-}
+const app = initializeApp(firebaseConfig);
 
 export const auth = getAuth();
+export const messaging = getMessaging(app);
+
+getToken(messaging, {
+  vapidKey: process.env.NEXT_PUBLIC_VAPID_KEY,
+})
+  .then((currentToken) => {
+    if (currentToken) {
+      console.log(currentToken);
+    } else {
+      console.log(
+        "No registration token available. Request permission to generate one."
+      );
+    }
+  })
+  .catch((err) => {
+    console.log("An error occurred while retrieving token. ", err);
+    // ...
+  });
