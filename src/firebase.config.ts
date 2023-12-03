@@ -16,19 +16,19 @@ const app = initializeApp(firebaseConfig);
 export const auth = getAuth();
 export const messaging = getMessaging(app);
 
-getToken(messaging, {
-  vapidKey: process.env.NEXT_PUBLIC_VAPID_KEY,
-})
-  .then((currentToken) => {
-    if (currentToken) {
-      console.log(currentToken);
-    } else {
-      console.log(
-        "No registration token available. Request permission to generate one."
-      );
-    }
+export const getMessagingToken = () =>
+  getToken(messaging, {
+    vapidKey: process.env.NEXT_PUBLIC_VAPID_KEY,
   })
-  .catch((err) => {
-    console.log("An error occurred while retrieving token. ", err);
-    // ...
-  });
+    .then((currentToken) => {
+      if (currentToken) {
+        console.log(currentToken);
+      } else {
+        console.log(
+          "No registration token available. Request permission to generate one."
+        );
+      }
+    })
+    .catch((err) => {
+      console.log("An error occurred while retrieving token. ", err);
+    });
