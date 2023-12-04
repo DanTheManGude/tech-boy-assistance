@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { Message } from "firebase-admin/messaging";
 import Data from "./payloadType";
 import { messaging, db } from "./setup";
 
@@ -24,7 +25,7 @@ export async function POST(request: NextRequest) {
 
   console.log(fullMessagCount);
 
-  var payload = {
+  const payload: Message = {
     notification: {
       title: `New request by ${fromName}`,
       body: `${reason}`,
