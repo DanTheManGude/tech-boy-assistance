@@ -15,4 +15,13 @@ firebase.initializeApp({
   appId: "1:293043360816:web:60969c6a3f4d08d5ef09f5",
 });
 
-firebase.messaging();
+const messaging = firebase.messaging();
+
+messaging.onBackgroundMessage(function (payload) {
+  console.log(
+    "[firebase-messaging-sw.js] Received background message ",
+    payload
+  );
+
+  navigator.setAppBadge(payload.data.fullMessagCount);
+});

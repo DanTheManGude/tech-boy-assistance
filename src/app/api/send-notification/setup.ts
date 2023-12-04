@@ -1,4 +1,5 @@
 import admin from "firebase-admin";
+import { getDatabase } from "firebase-admin/database";
 
 const serviceAccount = process.env.FIREBASE_ADMIN || "{}";
 
@@ -10,3 +11,4 @@ if (!admin.apps.length) {
 }
 
 export const messaging = admin.messaging();
+export const db = getDatabase();

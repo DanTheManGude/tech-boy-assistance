@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import Data from "./payloadType";
-import { messaging } from "./setup";
+import { messaging, db } from "./setup";
 
 export async function POST(request: NextRequest) {
   const data: Data = await request.json();
@@ -9,11 +9,27 @@ export async function POST(request: NextRequest) {
 
   console.log(fromName, reason, fcmToken);
 
+  const ref = db.ref("messages");
+
+  let messagesData: { [uid: string]: { [key: string]: any } } = {};
+  await ref.once("value", (data) => {
+    messagesData = data.val();
+  });
+
+  const fullMessagCount = Object.entries(messagesData)
+    .reduce((acc, [uid, messagesForOneAccountMap]) => {
+      return acc + Object.entries(messagesForOneAccountMap).length;
+    }, 0)
+    .toString();
+
+  console.log(fullMessagCount);
+
   var payload = {
     notification: {
       title: `New request by ${fromName}`,
       body: `${reason}`,
     },
+    data: { fullMessagCount },
     token: fcmToken,
   };
 
