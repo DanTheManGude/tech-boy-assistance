@@ -14,10 +14,9 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 
 export const auth = getAuth();
-export const messaging = getMessaging(app);
 
 export const getMessagingToken = () =>
-  getToken(messaging, {
+  getToken(getMessaging(app), {
     vapidKey: process.env.NEXT_PUBLIC_VAPID_KEY,
   }).then((currentToken) => {
     if (currentToken) {
