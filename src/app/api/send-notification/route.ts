@@ -1,15 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import Data from "./payloadType";
-import admin from "firebase-admin";
-
-const serviceAccount = process.env.FIREBASE_ADMIN || "{}";
-admin.initializeApp({
-  credential: admin.credential.cert(JSON.parse(serviceAccount)),
-  databaseURL: "https://tech-boy-assistance-default-rtdb.firebaseio.com",
-});
-
-const messaging = admin.messaging();
+import { messaging } from "./setup";
 
 export async function POST(request: NextRequest) {
   const data: Data = await request.json();
