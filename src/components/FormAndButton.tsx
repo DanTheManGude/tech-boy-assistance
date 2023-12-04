@@ -3,14 +3,16 @@ import { child, getDatabase, push, ref, update } from "firebase/database";
 
 import { useData, Message } from "@/context/DataContext";
 import { useAuth } from "@/context/AuthContext";
+import SendNotificationPayload from "@/app/api/send-notification/payloadType";
 
-const sendNotification = async (fcmToken: string) => {
+const sendNotification = async (fcmToken: string, message: Message) => {
+  const payload: SendNotificationPayload = { fcmToken, ...message };
   const requestOptions = {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ fcmToken }),
+    body: JSON.stringify(payload),
   };
 
   const response = await fetch("/api/send-notification", requestOptions);
@@ -61,7 +63,7 @@ export default function FormAndButton() {
         setReason("");
       });
 
-    sendNotification(fcmToken);
+    sendNotification(fcmToken, message);
   };
 
   return (

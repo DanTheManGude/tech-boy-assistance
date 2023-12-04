@@ -21,7 +21,6 @@ export default function PermissionButton() {
   const handleTokenButton = () => {
     getMessagingToken()
       .then((token) => {
-        debugger;
         update(ref(getDatabase()), { "fcm-token": token }).catch((err) => {
           console.log("An error occurred while updating token.", err);
         });
