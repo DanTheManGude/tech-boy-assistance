@@ -11,8 +11,8 @@ export async function POST(request: NextRequest) {
 
   var payload = {
     notification: {
-      title: `New request from ${fromName}`,
-      body: `Reason: ${reason}`,
+      title: `New request by ${fromName}`,
+      body: `${reason}`,
     },
     token: fcmToken,
   };
