@@ -97,6 +97,7 @@ export const DataContextProvider = ({
           }
         } else {
           setMessages([]);
+          navigator.clearAppBadge();
         }
       });
     } else {
