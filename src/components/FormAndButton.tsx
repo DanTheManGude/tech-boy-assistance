@@ -1,11 +1,33 @@
+import { useState } from "react";
 import { child, getDatabase, push, ref, update } from "firebase/database";
 
 import { useData, Message } from "@/context/DataContext";
 import { useAuth } from "@/context/AuthContext";
-import { useState } from "react";
+import SendNotificationPayload from "@/app/api/send-notification/payloadType";
+
+const sendNotification = async (fcmToken: string, message: Message) => {
+  const payload: SendNotificationPayload = { fcmToken, ...message };
+  const requestOptions = {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  };
+
+  const response = await fetch("/api/send-notification", requestOptions);
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error("send-notification", errorText);
+    return;
+  }
+
+  console.log("send-notification OK");
+};
 
 export default function FormAndButton() {
-  const { isAdmin } = useData();
+  const { isAdmin, fcmToken } = useData();
   const { user } = useAuth();
   const [reason, setReason] = useState("");
 
@@ -40,6 +62,8 @@ export default function FormAndButton() {
       .finally(() => {
         setReason("");
       });
+
+    sendNotification(fcmToken, message);
   };
 
   return (

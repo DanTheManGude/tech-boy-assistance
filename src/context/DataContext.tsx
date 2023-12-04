@@ -15,11 +15,13 @@ export type MessageWithKey = Message & { key: string };
 type Data = {
   isAdmin: boolean;
   messages: MessageWithKey[];
+  fcmToken: string;
 };
 
 const DataContext = createContext<Data>({
   isAdmin: false,
   messages: [],
+  fcmToken: "",
 });
 
 export const useData = () => useContext<Data>(DataContext);
@@ -34,6 +36,7 @@ export const DataContextProvider = ({
   const [isAdminLoading, setIsAdminLoading] = useState<boolean>(true);
   const [isAdmin, setIsAdmin] = useState<Data["isAdmin"]>(false);
   const [messages, setMessages] = useState<Data["messages"]>([]);
+  const [fcmToken, setFcmToken] = useState<Data["fcmToken"]>("");
 
   useEffect(() => {
     if (!user) {
@@ -102,13 +105,20 @@ export const DataContextProvider = ({
           }
         }
       );
+
+      get(child(ref(getDatabase()), "fcm-token")).then((snapshot) => {
+        if (snapshot.exists()) {
+          const token = snapshot.val();
+          setFcmToken(token);
+        }
+      });
     }
 
     return () => unsubscribe();
   }, [isAdmin, user]);
 
   return (
-    <DataContext.Provider value={{ isAdmin, messages }}>
+    <DataContext.Provider value={{ isAdmin, messages, fcmToken }}>
       {!isAdminLoading && children}
     </DataContext.Provider>
   );
