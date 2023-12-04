@@ -113,6 +113,8 @@ export const DataContextProvider = ({
               })
             );
             setMessages(messagesFromAccount);
+          } else {
+            setMessages([]);
           }
         }
       );
