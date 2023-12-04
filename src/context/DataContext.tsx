@@ -85,6 +85,16 @@ export const DataContextProvider = ({
           }, []);
 
           setMessages(fullMessages);
+
+          try {
+            if (fullMessages.length) {
+              navigator.setAppBadge(fullMessages.length);
+            } else {
+              navigator.clearAppBadge();
+            }
+          } catch (error) {
+            console.error(error);
+          }
         } else {
           setMessages([]);
         }
