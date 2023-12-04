@@ -17,14 +17,16 @@ export async function POST(request: NextRequest) {
     token: fcmToken,
   };
 
-  messaging
+  let success = false;
+  await messaging
     .send(payload)
     .then((result) => {
       console.log("messaging send result", result);
+      success = true;
     })
     .catch((error) => {
       console.error("messaging send error", error);
     });
 
-  return new NextResponse(null, { status: 204 });
+  return new NextResponse(null, { status: success ? 204 : 500 });
 }
