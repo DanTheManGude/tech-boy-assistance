@@ -3,10 +3,9 @@ import type { NextRequest } from "next/server";
 import Data from "./payloadType";
 import admin from "firebase-admin";
 
-var serviceAccount = require("./service-account-file.json");
-
+const serviceAccount = process.env.FIREBASE_ADMIN || "{}";
 admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
+  credential: admin.credential.cert(JSON.parse(serviceAccount)),
   databaseURL: "https://tech-boy-assistance-default-rtdb.firebaseio.com",
 });
 
@@ -14,9 +13,9 @@ const messaging = admin.messaging();
 
 export async function POST(request: NextRequest) {
   const data: Data = await request.json();
-  const { fcmToken, fromName, reason } = data;
+  const { fromName, reason, fcmToken } = data;
 
-  console.log(fcmToken, fromName, reason);
+  console.log(fromName, reason, fcmToken);
 
   var payload = {
     notification: {
