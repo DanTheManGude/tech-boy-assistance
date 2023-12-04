@@ -3,6 +3,14 @@ import type { NextRequest } from "next/server";
 import Data from "./payloadType";
 import admin from "firebase-admin";
 
+const serviceAccount = process.env.FIREBASE_ADMIN || "{}";
+admin.initializeApp({
+  credential: admin.credential.cert(JSON.parse(serviceAccount)),
+  databaseURL: "https://tech-boy-assistance-default-rtdb.firebaseio.com",
+});
+
+const messaging = admin.messaging();
+
 export async function POST(request: NextRequest) {
   const data: Data = await request.json();
   const { fromName, reason, fcmToken } = data;
@@ -16,14 +24,6 @@ export async function POST(request: NextRequest) {
     },
     token: fcmToken,
   };
-
-  const serviceAccount = process.env.FIREBASE_ADMIN || "{}";
-  admin.initializeApp({
-    credential: admin.credential.cert(JSON.parse(serviceAccount)),
-    databaseURL: "https://tech-boy-assistance-default-rtdb.firebaseio.com",
-  });
-
-  const messaging = admin.messaging();
 
   messaging
     .send(payload)
