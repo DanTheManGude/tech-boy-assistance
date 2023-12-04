@@ -5,7 +5,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useState } from "react";
 
 export default function FormAndButton() {
-  const { isAdmin } = useData();
+  const { isAdmin, fcmToken } = useData();
   const { user } = useAuth();
   const [reason, setReason] = useState("");
 
@@ -40,6 +40,8 @@ export default function FormAndButton() {
       .finally(() => {
         setReason("");
       });
+
+    console.log("fcmToken", fcmToken);
   };
 
   return (

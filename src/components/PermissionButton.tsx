@@ -22,7 +22,7 @@ export default function PermissionButton() {
     getMessagingToken()
       .then((token) => {
         debugger;
-        update(ref(getDatabase()), { [`fcm-token`]: token }).catch((err) => {
+        update(ref(getDatabase()), { "fcm-token": token }).catch((err) => {
           console.log("An error occurred while updating token.", err);
         });
       })
