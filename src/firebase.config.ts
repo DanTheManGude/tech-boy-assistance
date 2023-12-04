@@ -1,4 +1,9 @@
 import { initializeApp } from "firebase/app";
+import {
+  initializeAppCheck,
+  ReCaptchaEnterpriseProvider,
+} from "firebase/app-check";
+
 import { getAuth } from "firebase/auth";
 import { getMessaging, getToken } from "firebase/messaging";
 
@@ -14,6 +19,13 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 
 export const auth = getAuth();
+
+initializeAppCheck(app, {
+  provider: new ReCaptchaEnterpriseProvider(
+    process.env.NEXT_PUBLIC_CAPTCHA_SITE_KEY || ""
+  ),
+  isTokenAutoRefreshEnabled: true,
+});
 
 export const getMessagingToken = () =>
   getToken(getMessaging(app), {
