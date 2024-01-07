@@ -3,14 +3,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { child, get, getDatabase, onValue, ref } from "firebase/database";
 import { useAuth } from "@/context/AuthContext";
-
-export type Message = {
-  fromName: string;
-  submittedTime: number;
-  reason: string;
-};
-
-export type MessageWithKey = Message & { key: string };
+import { Message, MessageWithKey } from "@/constants";
 
 type Data = {
   isAdmin: boolean;

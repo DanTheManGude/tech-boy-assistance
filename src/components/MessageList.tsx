@@ -1,4 +1,5 @@
-import { useData, MessageWithKey } from "@/context/DataContext";
+import { MessageWithKey, messageStatusMap } from "@/constants";
+import { useData } from "@/context/DataContext";
 import { getDatabase, ref, update } from "firebase/database";
 
 export default function MessageList() {
@@ -11,7 +12,7 @@ export default function MessageList() {
   };
 
   const renderMessage = (message: MessageWithKey) => {
-    const { reason, fromName, submittedTime, key } = message;
+    const { reason, fromName, submittedTime, key, status } = message;
 
     return (
       <div
@@ -25,15 +26,17 @@ export default function MessageList() {
             At {new Date(submittedTime).toDateString()}&nbsp;
             {new Date(submittedTime).toLocaleTimeString()}
           </p>
+          <p>
+            Status:&nbsp;
+            {messageStatusMap[status]}
+          </p>
         </div>
-        {isAdmin && (
-          <button
-            className="mr-2 text-orange-600 font-bold"
-            onClick={getHandleDelete(key)}
-          >
-            X
-          </button>
-        )}
+        <button
+          className="mr-2 text-orange-600 font-bold"
+          onClick={getHandleDelete(key)}
+        >
+          X
+        </button>
       </div>
     );
   };

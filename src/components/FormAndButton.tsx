@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { child, getDatabase, push, ref, update } from "firebase/database";
 
-import { useData, Message } from "@/context/DataContext";
+import { useData } from "@/context/DataContext";
 import { useAuth } from "@/context/AuthContext";
 import SendNotificationPayload from "@/app/api/send-notification/payloadType";
+import { Message, messageStatusKeys } from "@/constants";
 
 const sendNotification = async (fcmToken: string, message: Message) => {
   const payload: SendNotificationPayload = { fcmToken, ...message };
@@ -55,6 +56,7 @@ export default function FormAndButton() {
       fromName: displayName || uid,
       submittedTime: Date.now(),
       reason,
+      status: messageStatusKeys.SUBMITTED,
     };
 
     update(ref(getDatabase()), { [`${rootPath}/${key}`]: message })
