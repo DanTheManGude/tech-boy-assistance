@@ -1,3 +1,5 @@
+import { useMemo } from "react";
+import { getDatabase, ref, update } from "firebase/database";
 import {
   MessageStatus,
   MessageWithKey,
@@ -6,11 +8,28 @@ import {
   notificationType,
 } from "@/constants";
 import { useData } from "@/context/DataContext";
-import { sendNotification } from "@/utils";
-import { getDatabase, ref, update } from "firebase/database";
+import {
+  calculateNewMessageCount,
+  sendNotification,
+  updateAppBadge,
+} from "@/utils";
 
 export default function MessageList() {
   const { messages, isAdmin, fcmToken } = useData();
+
+  const messageList: MessageWithKey[] = useMemo(
+    () =>
+      Object.entries(messages).reduce<MessageWithKey[]>(
+        (acc, [uid, messagesForOneAccountMap]) => {
+          const messagesForOneAccountList = Object.entries(
+            messagesForOneAccountMap
+          ).map(([key, message]) => ({ ...message, key: `${uid}/${key}` }));
+          return [...acc, ...messagesForOneAccountList];
+        },
+        []
+      ),
+    [messages]
+  );
 
   const getHandleDelete = (message: MessageWithKey) => () => {
     update(ref(getDatabase()), { [`messages/${message.key}`]: null }).catch(
@@ -25,6 +44,9 @@ export default function MessageList() {
     update(ref(getDatabase()), { [`messages/${key}/status`]: newStatus }).catch(
       console.error
     );
+
+    const newBadgeCount = calculateNewMessageCount(messages);
+    updateAppBadge(newBadgeCount);
   };
 
   const renderStatus = (status: MessageStatus, key: string) => {
@@ -85,7 +107,7 @@ export default function MessageList() {
 
   return (
     <div className="flex items-center justify-center mx-3 pt-4">
-      <div className="w-full max-w-sm">{messages.map(renderMessage)}</div>
+      <div className="w-full max-w-sm">{messageList.map(renderMessage)}</div>
     </div>
   );
 }

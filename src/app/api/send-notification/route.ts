@@ -1,13 +1,10 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { Message } from "firebase-admin/messaging";
-import {
-  Message as AssistanceMessage,
-  messageStatusKeys,
-  notificationType,
-} from "@/constants";
+import { MessagesData, notificationType } from "@/constants";
 import Data from "./payloadType";
 import { messaging, db } from "./setup";
+import { calculateNewMessageCount } from "@/utils";
 
 export async function POST(request: NextRequest) {
   const data: Data = await request.json();
@@ -17,24 +14,14 @@ export async function POST(request: NextRequest) {
 
   const ref = db.ref("messages");
 
-  let messagesData: { [uid: string]: { [key: string]: AssistanceMessage } } =
-    {};
+  let messagesData: MessagesData = {};
   await ref.once("value", (data) => {
     if (data.exists()) {
       messagesData = data.val();
     }
   });
 
-  const fullMessagCount = Object.values(messagesData)
-    .reduce((acc, messagesForOneAccountMap) => {
-      return (
-        acc +
-        Object.values(messagesForOneAccountMap).filter(
-          (message) => message.status === messageStatusKeys.SUBMITTED
-        ).length
-      );
-    }, 0)
-    .toString();
+  const fullMessagCount = calculateNewMessageCount(messagesData).toString();
 
   console.log(fullMessagCount);
 
