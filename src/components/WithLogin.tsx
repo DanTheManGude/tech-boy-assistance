@@ -1,4 +1,7 @@
 import { useEffect, useState } from "react";
+
+import { getDatabase, ref, update } from "firebase/database";
+
 import { useAuth } from "@/context/AuthContext";
 
 export default function WithLogin({ children }: { children: React.ReactNode }) {
@@ -7,7 +10,14 @@ export default function WithLogin({ children }: { children: React.ReactNode }) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
-    setIsLoggedIn(Boolean(user && user.uid));
+    if (user && user.uid) {
+      setIsLoggedIn(true);
+      update(ref(getDatabase()), {
+        [`accounts/${user.uid}/name`]: user.displayName,
+      }).catch((err) => {
+        console.log("An error occurred while updating name.", err);
+      });
+    }
   }, [user]);
 
   const handleClick = async (e: any) => {
