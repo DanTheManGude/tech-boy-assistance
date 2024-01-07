@@ -21,9 +21,9 @@ export async function POST(request: NextRequest) {
     }
   });
 
-  const fullMessagCount = calculateNewMessageCount(messagesData).toString();
+  const newBadgeCount = calculateNewMessageCount(messagesData).toString();
 
-  console.log(fullMessagCount);
+  console.log(newBadgeCount);
 
   let title = "";
   switch (type) {
@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
       title: title,
       body: reason,
     },
-    data: { fullMessagCount },
+    data: { newBadgeCount },
     token: fcmToken,
   };
 

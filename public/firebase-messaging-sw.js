@@ -23,5 +23,5 @@ messaging.onBackgroundMessage(function (payload) {
     payload
   );
 
-  navigator.setAppBadge(payload.data.fullMessagCount);
+  navigator.setAppBadge(payload.data.newBadgeCount);
 });
