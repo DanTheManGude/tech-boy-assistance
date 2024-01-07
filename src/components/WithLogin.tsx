@@ -6,12 +6,10 @@ import { useAuth } from "@/context/AuthContext";
 
 export default function WithLogin({ children }: { children: React.ReactNode }) {
   const { user, logOut = async () => {}, logIn = async () => {} } = useAuth();
-
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const isLoggedIn = Boolean(user);
 
   useEffect(() => {
     if (user && user.uid) {
-      setIsLoggedIn(true);
       update(ref(getDatabase()), {
         [`accounts/${user.uid}/name`]: user.displayName,
       }).catch((err) => {

@@ -21,6 +21,10 @@ export default function PermissionButton() {
   const { isAdmin } = useData();
   const { user } = useAuth();
 
+  if (!user) {
+    return null;
+  }
+
   const handleTokenButton = () => {
     getMessagingToken()
       .then((token) => {
@@ -53,7 +57,7 @@ export default function PermissionButton() {
 
   return (
     <>
-      <div className="flex items-center justify-center mx-3">
+      <div className="flex items-center justify-center mx-3 pt-2">
         <div className="mr-1 w-half rounded-lg border border-gray-200 bg-white shadow-md dark:border-gray-700 dark:bg-gray-800">
           <button
             onClick={requestPermission}

@@ -11,7 +11,7 @@ export default function FormAndButton() {
   const { user } = useAuth();
   const [reason, setReason] = useState("");
 
-  if (isAdmin) {
+  if (isAdmin || !user) {
     return null;
   }
 
