@@ -1,14 +1,22 @@
-import { MessageWithKey, messageStatusMap } from "@/constants";
+import {
+  MessageWithKey,
+  messageStatusMap,
+  notificationType,
+} from "@/constants";
 import { useData } from "@/context/DataContext";
+import { sendNotification } from "@/utils";
 import { getDatabase, ref, update } from "firebase/database";
 
 export default function MessageList() {
-  const { messages, isAdmin } = useData();
+  const { messages, isAdmin, fcmToken } = useData();
 
-  const getHandleDelete = (key: string) => () => {
-    update(ref(getDatabase()), { [`messages/${key}`]: null }).catch(
+  const getHandleDelete = (message: MessageWithKey) => () => {
+    update(ref(getDatabase()), { [`messages/${message.key}`]: null }).catch(
       console.error
     );
+    if (!isAdmin) {
+      sendNotification(fcmToken, message, notificationType.DELETE);
+    }
   };
 
   const renderMessage = (message: MessageWithKey) => {
@@ -33,7 +41,7 @@ export default function MessageList() {
         </div>
         <button
           className="mr-2 text-orange-600 font-bold"
-          onClick={getHandleDelete(key)}
+          onClick={getHandleDelete(message)}
         >
           X
         </button>

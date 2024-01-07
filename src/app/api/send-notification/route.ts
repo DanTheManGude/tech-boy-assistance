@@ -1,22 +1,28 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { Message } from "firebase-admin/messaging";
-import { Message as AssistanceMessage, messageStatusKeys } from "@/constants";
+import {
+  Message as AssistanceMessage,
+  messageStatusKeys,
+  notificationType,
+} from "@/constants";
 import Data from "./payloadType";
 import { messaging, db } from "./setup";
 
 export async function POST(request: NextRequest) {
   const data: Data = await request.json();
-  const { fromName, reason, fcmToken } = data;
+  const { fromName, reason, fcmToken, type } = data;
 
-  console.log(fromName, reason, fcmToken);
+  console.log(fromName, reason, fcmToken, type);
 
   const ref = db.ref("messages");
 
   let messagesData: { [uid: string]: { [key: string]: AssistanceMessage } } =
     {};
   await ref.once("value", (data) => {
-    messagesData = data.val();
+    if (data.exists()) {
+      messagesData = data.val();
+    }
   });
 
   const fullMessagCount = Object.values(messagesData)
@@ -32,10 +38,20 @@ export async function POST(request: NextRequest) {
 
   console.log(fullMessagCount);
 
+  let title = "";
+  switch (type) {
+    case notificationType.NEW:
+      title = `New request by ${fromName}`;
+      break;
+    case notificationType.DELETE:
+      title = `Request deleted by ${fromName}`;
+      break;
+  }
+
   const payload: Message = {
     notification: {
-      title: `New request by ${fromName}`,
-      body: `${reason}`,
+      title: title,
+      body: reason,
     },
     data: { fullMessagCount },
     token: fcmToken,

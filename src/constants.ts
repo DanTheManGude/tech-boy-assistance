@@ -24,3 +24,6 @@ export type Message = {
 };
 
 export type MessageWithKey = Message & { key: string };
+
+export const notificationType = { NEW: "NEW", DELETE: "DELETE" } as const;
+export type NotificationType = ValueOf<typeof notificationType>;
