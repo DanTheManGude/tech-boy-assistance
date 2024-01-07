@@ -22,6 +22,7 @@ export type Message = {
   reason: string;
   status: MessageStatus;
   read: boolean;
+  uid: string;
 };
 
 export type MessageWithKey = Message & { key: string };

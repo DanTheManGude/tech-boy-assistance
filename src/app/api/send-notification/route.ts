@@ -5,23 +5,41 @@ import { MessagesData, notificationType } from "@/constants";
 import Data from "./payloadType";
 import { messaging, db } from "./setup";
 import { calculateNewMessageCount } from "@/utils";
+import { ValueOf } from "next/dist/shared/lib/constants";
 
 export async function POST(request: NextRequest) {
   const data: Data = await request.json();
-  const { fromName, reason, fcmToken, type } = data;
+  const { fromName, reason, status, uid, fcmToken, type } = data;
 
-  console.log(fromName, reason, fcmToken, type);
+  console.log(uid, reason, fcmToken, type);
 
-  const ref = db.ref("messages");
+  let newBadgeCount: string = "1";
 
-  let messagesData: MessagesData = {};
-  await ref.once("value", (data) => {
-    if (data.exists()) {
-      messagesData = data.val();
-    }
-  });
+  if (type === notificationType.UPDATE) {
+    const ref = db.ref(`messages/${uid}`);
 
-  const newBadgeCount = calculateNewMessageCount(messagesData).toString();
+    let messagesForUser: ValueOf<MessagesData> = {};
+    await ref.once("value", (data) => {
+      if (data.exists()) {
+        messagesForUser = data.val();
+      }
+    });
+
+    newBadgeCount = Object.values(messagesForUser)
+      .filter((message) => !message.read)
+      .length.toString();
+  } else {
+    const ref = db.ref("messages");
+
+    let messagesData: MessagesData = {};
+    await ref.once("value", (data) => {
+      if (data.exists()) {
+        messagesData = data.val();
+      }
+    });
+
+    newBadgeCount = calculateNewMessageCount(messagesData).toString();
+  }
 
   console.log(newBadgeCount);
 
@@ -32,6 +50,9 @@ export async function POST(request: NextRequest) {
       break;
     case notificationType.DELETE:
       title = `Request deleted by ${fromName}`;
+      break;
+    case notificationType.UPDATE:
+      title = `Updated status to ${status}`;
       break;
   }
 

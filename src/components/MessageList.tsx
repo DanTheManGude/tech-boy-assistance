@@ -77,7 +77,7 @@ export default function MessageList() {
     const newBadgeCount = calculateNewMessageCount(messages);
     updateAppBadge(newBadgeCount);
 
-    //sendNotification(fcmToken, message, notificationType.UPDATE);
+    sendNotification(fcmToken, message, notificationType.UPDATE);
   };
 
   const renderStatus = (status: MessageStatus, message: MessageWithKey) => {

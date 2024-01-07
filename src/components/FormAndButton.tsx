@@ -37,6 +37,7 @@ export default function FormAndButton() {
       reason,
       status: messageStatusKeys.SUBMITTED,
       read: true,
+      uid: user.uid,
     };
 
     update(ref(getDatabase()), { [`${rootPath}/${key}`]: message })
