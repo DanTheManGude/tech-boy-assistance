@@ -1,4 +1,4 @@
-import { Message } from "@/context/DataContext";
+import { Message } from "@/constants";
 
 type payload = { fcmToken: string } & Message;
 
