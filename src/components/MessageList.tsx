@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { getDatabase, ref, update } from "firebase/database";
 import {
   MessageStatus,
@@ -30,6 +30,24 @@ export default function MessageList() {
       ),
     [messages]
   );
+
+  useEffect(() => {
+    if (!isAdmin) {
+      const unreadMessages = messageList.filter((message) => !message.read);
+
+      if (unreadMessages.length) {
+        const updates = unreadMessages.reduce<{ [path: string]: boolean }>(
+          (acc, message) => ({
+            ...acc,
+            [`messages/${message.key}/read`]: true,
+          }),
+          {}
+        );
+
+        update(ref(getDatabase()), updates).catch(console.error);
+      }
+    }
+  }, [messageList]);
 
   const getHandleDelete = (message: MessageWithKey) => () => {
     update(ref(getDatabase()), { [`messages/${message.key}`]: null }).catch(
