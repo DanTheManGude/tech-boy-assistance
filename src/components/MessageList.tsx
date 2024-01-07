@@ -33,6 +33,16 @@ export default function MessageList() {
 
   useEffect(() => {
     if (!isAdmin) {
+      try {
+        navigator.clearAppBadge();
+      } catch (error) {
+        console.error(error);
+      }
+    }
+  }, [isAdmin]);
+
+  useEffect(() => {
+    if (!isAdmin) {
       const unreadMessages = messageList.filter((message) => !message.read);
 
       if (unreadMessages.length) {
@@ -47,7 +57,7 @@ export default function MessageList() {
         update(ref(getDatabase()), updates).catch(console.error);
       }
     }
-  }, [messageList]);
+  }, [messageList, isAdmin]);
 
   const getHandleDelete = (message: MessageWithKey) => () => {
     update(ref(getDatabase()), { [`messages/${message.key}`]: null }).catch(
