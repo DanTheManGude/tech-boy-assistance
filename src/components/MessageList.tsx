@@ -40,16 +40,19 @@ export default function MessageList() {
     }
   };
 
-  const handleChangeStatus = (newStatus: string, key: string) => {
-    update(ref(getDatabase()), { [`messages/${key}/status`]: newStatus }).catch(
-      console.error
-    );
+  const handleChangeStatus = (newStatus: string, message: MessageWithKey) => {
+    update(ref(getDatabase()), {
+      [`messages/${message.key}/status`]: newStatus,
+      [`messages/${message.key}/read`]: false,
+    }).catch(console.error);
 
     const newBadgeCount = calculateNewMessageCount(messages);
     updateAppBadge(newBadgeCount);
+
+    //sendNotification(fcmToken, message, notificationType.UPDATE);
   };
 
-  const renderStatus = (status: MessageStatus, key: string) => {
+  const renderStatus = (status: MessageStatus, message: MessageWithKey) => {
     if (!isAdmin) {
       return (
         <p>
@@ -64,7 +67,7 @@ export default function MessageList() {
           id="status"
           className="my-2 w-5/6 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
           onChange={(event) => {
-            handleChangeStatus(event.target.value, key);
+            handleChangeStatus(event.target.value, message);
           }}
           value={status}
         >
@@ -93,7 +96,7 @@ export default function MessageList() {
             At {new Date(submittedTime).toDateString()}&nbsp;
             {new Date(submittedTime).toLocaleTimeString()}
           </p>
-          {renderStatus(status, key)}
+          {renderStatus(status, message)}
         </div>
         <button
           className="mr-2 text-orange-600 font-bold"

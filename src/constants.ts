@@ -21,11 +21,16 @@ export type Message = {
   submittedTime: number;
   reason: string;
   status: MessageStatus;
+  read: boolean;
 };
 
 export type MessageWithKey = Message & { key: string };
 
-export const notificationType = { NEW: "NEW", DELETE: "DELETE" } as const;
+export const notificationType = {
+  NEW: "NEW",
+  DELETE: "DELETE",
+  UPDATE: "UPDATE",
+} as const;
 export type NotificationType = ValueOf<typeof notificationType>;
 
 export type MessagesData = {
