@@ -1,6 +1,8 @@
 import { getDatabase, ref, update } from "firebase/database";
 
 import { useData } from "@/context/DataContext";
+import { useAuth } from "@/context/AuthContext";
+
 import { getMessagingToken } from "@/firebase.config";
 
 const requestPermission = () => {
@@ -13,17 +15,24 @@ const requestPermission = () => {
 
 export default function PermissionButton() {
   const { isAdmin } = useData();
-
-  if (!isAdmin) {
-    return null;
-  }
+  const { user } = useAuth();
 
   const handleTokenButton = () => {
     getMessagingToken()
       .then((token) => {
-        update(ref(getDatabase()), { "fcm-token": token }).catch((err) => {
-          console.log("An error occurred while updating token.", err);
-        });
+        if (isAdmin) {
+          update(ref(getDatabase()), { "fcm-token": token }).catch((err) => {
+            console.log("An error occurred while updating token.", err);
+          });
+        } else if (user) {
+          update(ref(getDatabase()), {
+            [`accounts/${user.uid}/fcm-token`]: token,
+          }).catch((err) => {
+            console.log("An error occurred while updating token.", err);
+          });
+        } else {
+          console.log("No logged in user.");
+        }
       })
       .catch((err) => {
         console.log("An error occurred while retrieving token. ", err);
