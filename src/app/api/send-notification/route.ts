@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { Message } from "firebase-admin/messaging";
-import { MessagesData, notificationType } from "@/constants";
+import { MessagesData, messageStatusMap, notificationType } from "@/constants";
 import Data from "./payloadType";
 import { messaging, db } from "./setup";
 import { calculateNewMessageCount } from "@/utils";
@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
       title = `Request deleted by ${fromName}`;
       break;
     case notificationType.UPDATE:
-      title = `Updated status to ${status}`;
+      title = `Updated status to "${messageStatusMap[status]}"`;
       break;
   }
 
