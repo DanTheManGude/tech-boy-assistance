@@ -69,7 +69,10 @@ export default function MessageList() {
     }
   };
 
-  const handleChangeStatus = (newStatus: string, message: MessageWithKey) => {
+  const handleChangeStatus = (
+    newStatus: MessageStatus,
+    message: MessageWithKey
+  ) => {
     update(ref(getDatabase()), {
       [`messages/${message.key}/status`]: newStatus,
       [`messages/${message.key}/read`]: false,
@@ -82,7 +85,11 @@ export default function MessageList() {
       .then((snapshot) => {
         if (snapshot.exists()) {
           const clientFcmToken = snapshot.val();
-          sendNotification(clientFcmToken, message, notificationType.UPDATE);
+          sendNotification(
+            clientFcmToken,
+            { ...message, status: newStatus },
+            notificationType.UPDATE
+          );
         } else {
           console.log("No fcm-token for client");
         }
@@ -108,7 +115,7 @@ export default function MessageList() {
           id="status"
           className="my-2 w-5/6 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
           onChange={(event) => {
-            handleChangeStatus(event.target.value, message);
+            handleChangeStatus(event.target.value as MessageStatus, message);
           }}
           value={status}
         >
