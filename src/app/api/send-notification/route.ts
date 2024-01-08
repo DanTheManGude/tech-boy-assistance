@@ -60,6 +60,7 @@ export async function POST(request: NextRequest) {
     notification: {
       title: title,
       body: reason,
+      imageUrl: "https://tech.dangude.com/apple-icon.png",
     },
     data: { newBadgeCount },
     token: fcmToken,
