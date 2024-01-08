@@ -1,5 +1,6 @@
 import { useEffect, useMemo } from "react";
-import { getDatabase, ref, update } from "firebase/database";
+import { getDatabase, ref, update, child, get } from "firebase/database";
+
 import {
   MessageStatus,
   MessageWithKey,
@@ -77,7 +78,21 @@ export default function MessageList() {
     const newBadgeCount = calculateNewMessageCount(messages);
     updateAppBadge(newBadgeCount);
 
-    sendNotification(fcmToken, message, notificationType.UPDATE);
+    let clientFcmToken = "";
+    get(child(ref(getDatabase()), `accounts/${message.uid}/fcm-token`))
+      .then((snapshot) => {
+        if (snapshot.exists()) {
+          clientFcmToken = snapshot.val();
+        } else {
+          console.log("No fcm-token for client");
+        }
+      })
+      .catch((error) => {
+        console.error(error);
+        alert(error);
+      });
+
+    sendNotification(clientFcmToken, message, notificationType.UPDATE);
   };
 
   const renderStatus = (status: MessageStatus, message: MessageWithKey) => {
