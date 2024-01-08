@@ -78,11 +78,11 @@ export default function MessageList() {
     const newBadgeCount = calculateNewMessageCount(messages);
     updateAppBadge(newBadgeCount);
 
-    let clientFcmToken = "";
     get(child(ref(getDatabase()), `accounts/${message.uid}/fcm-token`))
       .then((snapshot) => {
         if (snapshot.exists()) {
-          clientFcmToken = snapshot.val();
+          const clientFcmToken = snapshot.val();
+          sendNotification(clientFcmToken, message, notificationType.UPDATE);
         } else {
           console.log("No fcm-token for client");
         }
@@ -91,8 +91,6 @@ export default function MessageList() {
         console.error(error);
         alert(error);
       });
-
-    sendNotification(clientFcmToken, message, notificationType.UPDATE);
   };
 
   const renderStatus = (status: MessageStatus, message: MessageWithKey) => {
