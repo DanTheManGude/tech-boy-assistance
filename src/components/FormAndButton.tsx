@@ -1,37 +1,17 @@
 import { useState } from "react";
 import { child, getDatabase, push, ref, update } from "firebase/database";
 
-import { useData, Message } from "@/context/DataContext";
+import { useData } from "@/context/DataContext";
 import { useAuth } from "@/context/AuthContext";
-import SendNotificationPayload from "@/app/api/send-notification/payloadType";
-
-const sendNotification = async (fcmToken: string, message: Message) => {
-  const payload: SendNotificationPayload = { fcmToken, ...message };
-  const requestOptions = {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(payload),
-  };
-
-  const response = await fetch("/api/send-notification", requestOptions);
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    console.error("send-notification", errorText);
-    return;
-  }
-
-  console.log("send-notification OK");
-};
+import { Message, messageStatusKeys, notificationType } from "@/constants";
+import { sendNotification } from "@/utils";
 
 export default function FormAndButton() {
   const { isAdmin, fcmToken } = useData();
   const { user } = useAuth();
   const [reason, setReason] = useState("");
 
-  if (isAdmin) {
+  if (isAdmin || !user) {
     return null;
   }
 
@@ -55,6 +35,9 @@ export default function FormAndButton() {
       fromName: displayName || uid,
       submittedTime: Date.now(),
       reason,
+      status: messageStatusKeys.SUBMITTED,
+      read: true,
+      uid: user.uid,
     };
 
     update(ref(getDatabase()), { [`${rootPath}/${key}`]: message })
@@ -63,7 +46,7 @@ export default function FormAndButton() {
         setReason("");
       });
 
-    sendNotification(fcmToken, message);
+    sendNotification(fcmToken, message, notificationType.NEW);
   };
 
   return (

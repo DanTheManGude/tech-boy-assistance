@@ -2,25 +2,20 @@
 
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { child, get, getDatabase, onValue, ref } from "firebase/database";
+import { ValueOf } from "next/dist/shared/lib/constants";
 import { useAuth } from "@/context/AuthContext";
-
-export type Message = {
-  fromName: string;
-  submittedTime: number;
-  reason: string;
-};
-
-export type MessageWithKey = Message & { key: string };
+import { MessagesData } from "@/constants";
+import { calculateNewMessageCount, updateAppBadge } from "@/utils";
 
 type Data = {
   isAdmin: boolean;
-  messages: MessageWithKey[];
+  messages: MessagesData;
   fcmToken: string;
 };
 
 const DataContext = createContext<Data>({
   isAdmin: false,
-  messages: [],
+  messages: {},
   fcmToken: "",
 });
 
@@ -35,7 +30,7 @@ export const DataContextProvider = ({
 
   const [isAdminLoading, setIsAdminLoading] = useState<boolean>(true);
   const [isAdmin, setIsAdmin] = useState<Data["isAdmin"]>(false);
-  const [messages, setMessages] = useState<Data["messages"]>([]);
+  const [messages, setMessages] = useState<Data["messages"]>({});
   const [fcmToken, setFcmToken] = useState<Data["fcmToken"]>("");
 
   useEffect(() => {
@@ -64,7 +59,7 @@ export const DataContextProvider = ({
 
   useEffect(() => {
     if (!user) {
-      setMessages([]);
+      setMessages({});
       return () => {};
     }
 
@@ -73,30 +68,15 @@ export const DataContextProvider = ({
     if (isAdmin) {
       unsubscribe = onValue(ref(getDatabase(), `messages`), (snapshot) => {
         if (snapshot.exists()) {
-          const snapshotValue: { [uid: string]: { [key: string]: Message } } =
-            snapshot.val();
-          const fullMessages = Object.entries(snapshotValue).reduce<
-            MessageWithKey[]
-          >((acc, [uid, messagesForOneAccountMap]) => {
-            const messagesForOneAccountList = Object.entries(
-              messagesForOneAccountMap
-            ).map(([key, message]) => ({ ...message, key: `${uid}/${key}` }));
-            return [...acc, ...messagesForOneAccountList];
-          }, []);
+          const snapshotValue: MessagesData = snapshot.val();
 
-          setMessages(fullMessages);
+          setMessages(snapshotValue);
 
-          try {
-            if (fullMessages.length) {
-              navigator.setAppBadge(fullMessages.length);
-            } else {
-              navigator.clearAppBadge();
-            }
-          } catch (error) {
-            console.error(error);
-          }
+          const newBadgeCount = calculateNewMessageCount(snapshotValue);
+
+          updateAppBadge(newBadgeCount);
         } else {
-          setMessages([]);
+          setMessages({});
           navigator.clearAppBadge();
         }
       });
@@ -105,16 +85,11 @@ export const DataContextProvider = ({
         ref(getDatabase(), `messages/${user.uid}`),
         (snapshot) => {
           if (snapshot.exists()) {
-            const snapshotValue: { [key: string]: Message } = snapshot.val();
-            const messagesFromAccount = Object.entries(snapshotValue).map(
-              ([key, message]) => ({
-                ...message,
-                key: `${user.uid}/${key}`,
-              })
-            );
-            setMessages(messagesFromAccount);
+            const snapshotValue: ValueOf<MessagesData> = snapshot.val();
+
+            setMessages({ [user.uid]: snapshotValue });
           } else {
-            setMessages([]);
+            setMessages({});
           }
         }
       );

@@ -1,36 +1,67 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { Message } from "firebase-admin/messaging";
+import { MessagesData, messageStatusMap, notificationType } from "@/constants";
 import Data from "./payloadType";
 import { messaging, db } from "./setup";
+import { calculateNewMessageCount } from "@/utils";
+import { ValueOf } from "next/dist/shared/lib/constants";
 
 export async function POST(request: NextRequest) {
   const data: Data = await request.json();
-  const { fromName, reason, fcmToken } = data;
+  const { fromName, reason, status, uid, fcmToken, type } = data;
 
-  console.log(fromName, reason, fcmToken);
+  console.log(uid, reason, fcmToken, type);
 
-  const ref = db.ref("messages");
+  let newBadgeCount: string = "1";
 
-  let messagesData: { [uid: string]: { [key: string]: any } } = {};
-  await ref.once("value", (data) => {
-    messagesData = data.val();
-  });
+  if (type === notificationType.UPDATE) {
+    const ref = db.ref(`messages/${uid}`);
 
-  const fullMessagCount = Object.entries(messagesData)
-    .reduce((acc, [uid, messagesForOneAccountMap]) => {
-      return acc + Object.entries(messagesForOneAccountMap).length;
-    }, 0)
-    .toString();
+    let messagesForUser: ValueOf<MessagesData> = {};
+    await ref.once("value", (data) => {
+      if (data.exists()) {
+        messagesForUser = data.val();
+      }
+    });
 
-  console.log(fullMessagCount);
+    newBadgeCount = Object.values(messagesForUser)
+      .filter((message) => !message.read)
+      .length.toString();
+  } else {
+    const ref = db.ref("messages");
+
+    let messagesData: MessagesData = {};
+    await ref.once("value", (data) => {
+      if (data.exists()) {
+        messagesData = data.val();
+      }
+    });
+
+    newBadgeCount = calculateNewMessageCount(messagesData).toString();
+  }
+
+  console.log(newBadgeCount);
+
+  let title = "";
+  switch (type) {
+    case notificationType.NEW:
+      title = `New request by ${fromName}`;
+      break;
+    case notificationType.DELETE:
+      title = `Request deleted by ${fromName}`;
+      break;
+    case notificationType.UPDATE:
+      title = `Updated status to "${messageStatusMap[status]}"`;
+      break;
+  }
 
   const payload: Message = {
     notification: {
-      title: `New request by ${fromName}`,
-      body: `${reason}`,
+      title: title,
+      body: reason,
     },
-    data: { fullMessagCount },
+    data: { newBadgeCount },
     token: fcmToken,
   };
 

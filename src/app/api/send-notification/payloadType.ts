@@ -1,5 +1,5 @@
-import { Message } from "@/context/DataContext";
+import { Message, NotificationType } from "@/constants";
 
-type payload = { fcmToken: string } & Message;
+type payload = { fcmToken: string; type: NotificationType } & Message;
 
 export default payload;
