@@ -46,7 +46,7 @@ export default function FormAndButton() {
         setReason("");
       });
 
-    sendNotification(fcmToken, message, notificationType.NEW);
+    sendNotification(fcmToken, { ...message, key }, notificationType.NEW);
   };
 
   return (

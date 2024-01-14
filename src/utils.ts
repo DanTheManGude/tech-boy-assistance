@@ -1,6 +1,6 @@
 import SendNotificationPayload from "@/app/api/send-notification/payloadType";
 import {
-  Message,
+  MessageWithKey,
   MessagesData,
   NotificationType,
   messageStatusKeys,
@@ -8,7 +8,7 @@ import {
 
 export const sendNotification = async (
   fcmToken: string,
-  message: Message,
+  message: MessageWithKey,
   type: NotificationType
 ) => {
   const payload: SendNotificationPayload = { fcmToken, type, ...message };

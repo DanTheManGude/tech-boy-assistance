@@ -1,5 +1,5 @@
-import { Message, NotificationType } from "@/constants";
+import { MessageWithKey, NotificationType } from "@/constants";
 
-type payload = { fcmToken: string; type: NotificationType } & Message;
+type payload = { fcmToken: string; type: NotificationType } & MessageWithKey;
 
 export default payload;
