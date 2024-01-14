@@ -1,19 +1,19 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { Message } from "firebase-admin/messaging";
+import { Message, WebpushNotification } from "firebase-admin/messaging";
 import { MessagesData, messageStatusMap, notificationType } from "@/constants";
 import Data from "./payloadType";
-import { messaging, db } from "./setup";
+import { messaging, db } from "../admin-setup";
 import { calculateNewMessageCount } from "@/utils";
 import { ValueOf } from "next/dist/shared/lib/constants";
 
 export async function POST(request: NextRequest) {
   const data: Data = await request.json();
-  const { fromName, reason, status, uid, fcmToken, type } = data;
+  const { fromName, reason, status, uid, fcmToken, type, key } = data;
 
   console.log(uid, reason, fcmToken, type);
 
-  let newBadgeCount: string = "1";
+  let newBadgeCount: number = 1;
 
   if (type === notificationType.UPDATE) {
     const ref = db.ref(`messages/${uid}`);
@@ -25,9 +25,9 @@ export async function POST(request: NextRequest) {
       }
     });
 
-    newBadgeCount = Object.values(messagesForUser)
-      .filter((message) => !message.read)
-      .length.toString();
+    newBadgeCount = Object.values(messagesForUser).filter(
+      (message) => !message.read
+    ).length;
   } else {
     const ref = db.ref("messages");
 
@@ -38,15 +38,24 @@ export async function POST(request: NextRequest) {
       }
     });
 
-    newBadgeCount = calculateNewMessageCount(messagesData).toString();
+    newBadgeCount = calculateNewMessageCount(messagesData);
   }
 
   console.log(newBadgeCount);
 
+  let maybeActionWithData: WebpushNotification = {};
   let title = "";
   switch (type) {
     case notificationType.NEW:
       title = `New request by ${fromName}`;
+      maybeActionWithData = {
+        actions: [{ action: "ACK", title: "ACK" }],
+        data: {
+          uid,
+          messageKey: key,
+          newBadgeCount: (newBadgeCount - 1).toString(),
+        },
+      };
       break;
     case notificationType.DELETE:
       title = `Request deleted by ${fromName}`;
@@ -56,14 +65,24 @@ export async function POST(request: NextRequest) {
       break;
   }
 
+  const appUrl = "https://tech.dangude.com";
+  const imageUrl = `${appUrl}/apple-icon.png`;
+
   const payload: Message = {
     notification: {
       title: title,
       body: reason,
-      imageUrl: "https://tech.dangude.com/apple-icon.png",
+      imageUrl,
     },
-    data: { newBadgeCount },
+    data: { newBadgeCount: newBadgeCount.toString() },
     token: fcmToken,
+    webpush: {
+      fcmOptions: { link: appUrl },
+      notification: {
+        icon: imageUrl,
+        ...maybeActionWithData,
+      },
+    },
   };
 
   let success = false;
