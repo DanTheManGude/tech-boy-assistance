@@ -25,7 +25,3 @@ messaging.onBackgroundMessage(function (payload) {
 
   navigator.setAppBadge(payload.data.newBadgeCount);
 });
-
-addEventListener("notificationclick", (event) => {
-  window.focus();
-});
