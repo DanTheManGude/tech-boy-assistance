@@ -27,10 +27,9 @@ messaging.onBackgroundMessage(function (payload) {
 });
 
 addEventListener("notificationclick", (event) => {
-  const { action, notification, newBadgeCount } = event;
-
-  if (action === "ACK") {
-    messageKey = notification.data.messageKey;
+  if (event.action === "ACK") {
+    const { uid, messageKey, newBadgeCount } =
+      event.notification.data.FCM_MSG.notification.data;
     if (messageKey) {
       fetch("/api/ack-action", {
         method: "POST",
