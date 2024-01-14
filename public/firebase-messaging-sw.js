@@ -25,3 +25,33 @@ messaging.onBackgroundMessage(function (payload) {
 
   navigator.setAppBadge(payload.data.newBadgeCount);
 });
+
+addEventListener("notificationclick", (event) => {
+  const { action, notification, newBadgeCount } = event;
+
+  if (action === "ACK") {
+    messageKey = notification.data.messageKey;
+    if (messageKey) {
+      fetch("/api/ack-action", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ uid, messageKey }),
+      })
+        .then((response) => {
+          if (!response.ok) {
+            response.text().then((errorText) => {
+              console.error(
+                "error notificationclick request update status",
+                errorText
+              );
+            });
+          } else {
+            navigator.setAppBadge(newBadgeCount);
+          }
+        })
+        .catch(console.error);
+    }
+  }
+});
