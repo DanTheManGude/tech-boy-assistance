@@ -64,10 +64,8 @@ export async function POST(request: NextRequest) {
     data: { newBadgeCount },
     token: fcmToken,
     webpush: {
-      fcmOptions: { link: "/" },
       notification: {
         icon: "https://tech.dangude.com/apple-icon.png",
-        actions: [{ action: "VIEW", title: "View" }],
       },
     },
   };
